@@ -1,0 +1,3 @@
+# Netlify 설정: site 폴더를 그대로 올린다 (빌드 과정 없음)
+[build]
+  publish = "site"

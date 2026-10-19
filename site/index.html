@@ -1,0 +1,1650 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>STICORNY 공동구매 제안</title>
+<link rel="stylesheet" href="fonts/fonts.css">
+<style>/* ============================================================
+   STICORNY 공동구매 제안 — styles
+   3 variants via body[data-variant]: editorial / minimal / dark
+   Accent + on-accent set at runtime by tweaks-app.jsx
+   ============================================================ */
+
+:root {
+  --accent: #F4C144;
+  --accent-deep: #b9831a;
+  --accent-text: #927429;
+  --on-accent: #221813;
+  --sans: "Pretendard Variable", Pretendard, system-ui, -apple-system, "Apple SD Gothic Neo", sans-serif;
+  --serif: "Gowun Batang", "Fraunces", serif;
+  --maxw: 1180px;
+  --pad-x: clamp(22px, 5vw, 64px);
+}
+
+/* ---------- variant tokens ---------- */
+body[data-variant="editorial"] {
+  --page-bg:#F4ECDD; --page-text:#2C2117; --page-muted:#8A7458;
+  --alt-bg:#EBDFC9;
+  --hero-bg:#221813; --hero-text:#F3EADA; --hero-muted:#B6A079; --hero-grid:rgba(243,234,218,0.07);
+  --card-bg:#FBF7EE; --card-text:#2C2117; --card-muted:#8A7458;
+  --card-border:rgba(60,40,20,0.12); --card-shadow:0 22px 55px -32px rgba(40,26,14,0.55);
+  --band-bg:#221813; --band-text:#F3EADA; --band-muted:#B6A079;
+  --line:rgba(60,40,20,0.15);
+  --nav-bg:rgba(244,236,221,0.86); --nav-text:#2C2117; --nav-border:rgba(60,40,20,0.12);
+  --display:var(--sans); --display-weight:850; --logo:url("assets/logo-light.png");
+  --strike:#a9967c;
+}
+body[data-variant="minimal"] {
+  --page-bg:#FBF8F1; --page-text:#2A241C; --page-muted:#9A8A72;
+  --alt-bg:#F4EFE4;
+  --hero-bg:#FBF8F1; --hero-text:#2A241C; --hero-muted:#9A8A72; --hero-grid:rgba(40,30,16,0.05);
+  --card-bg:#FFFFFF; --card-text:#2A241C; --card-muted:#9A8A72;
+  --card-border:rgba(40,30,16,0.11); --card-shadow:none;
+  --band-bg:#F0E9DA; --band-text:#2A241C; --band-muted:#9A8A72;
+  --line:rgba(40,30,16,0.12);
+  --nav-bg:rgba(251,248,241,0.85); --nav-text:#2A241C; --nav-border:rgba(40,30,16,0.10);
+  --display:var(--serif); --display-weight:700; --logo:url("assets/logo-light.png");
+  --strike:#b9ab95;
+}
+body[data-variant="dark"] {
+  --page-bg:#1E1712; --page-text:#ECE1CF; --page-muted:#A38E6F;
+  --alt-bg:#251C14;
+  --hero-bg:#150F09; --hero-text:#F3E8D6; --hero-muted:#A38E6F; --hero-grid:rgba(243,232,214,0.06);
+  --card-bg:#271E16; --card-text:#ECE1CF; --card-muted:#A38E6F;
+  --card-border:rgba(240,225,200,0.13); --card-shadow:0 28px 64px -34px rgba(0,0,0,0.75);
+  --band-bg:#120C07; --band-text:#F3E8D6; --band-muted:#A38E6F;
+  --line:rgba(240,225,200,0.13);
+  --nav-bg:rgba(21,15,9,0.8); --nav-text:#F3E8D6; --nav-border:rgba(240,225,200,0.12);
+  --display:var(--sans); --display-weight:850; --logo:url("assets/logo-dark.png");
+  --strike:#7c6c54;
+}
+
+/* ---------- base ---------- */
+* { box-sizing: border-box; }
+
+/* On dark backgrounds the gold text should stay bright (not the deepened
+   light-bg variant). Editorial's hero/stats/band/footer are dark bands;
+   the full-dark variant is dark everywhere. */
+body[data-variant="editorial"] .hero,
+body[data-variant="editorial"] .stats,
+body[data-variant="editorial"] .band,
+body[data-variant="editorial"] .footer,
+body[data-variant="dark"] {
+  --accent-text: var(--accent);
+}
+html { scroll-behavior: smooth; }
+/* PC-only cute corn-kernel cursor */
+body { cursor: url("assets/cursor.png") 16 2, auto; }
+a, button, .btn, .chip, .cmethod, .store-link, .lnk, summary, label,
+image-slot, [role="button"] { cursor: url("assets/cursor.png") 16 2, pointer; }
+/* squish to pressed corn while mouse is held down */
+body.corn-press, body.corn-press a, body.corn-press button, body.corn-press .btn,
+body.corn-press .chip, body.corn-press .cmethod, body.corn-press .store-link,
+body.corn-press .lnk, body.corn-press summary, body.corn-press label,
+body.corn-press image-slot, body.corn-press [role="button"] {
+  cursor: url("assets/cursor-press.png") 16 2, auto;
+}
+/* click ripple */
+.corn-pop { position: fixed; width: 14px; height: 14px; margin: -7px 0 0 -7px;
+  border-radius: 50%; border: 2px solid var(--accent); pointer-events: none;
+  z-index: 9999; animation: cornpop .42s ease-out forwards; }
+@keyframes cornpop { 0% { transform: scale(.3); opacity: .85; } 100% { transform: scale(1.9); opacity: 0; } }
+/* PC/mobile line-break control: .br-m breaks on mobile only */
+.br-m { display: none; }
+.pc-only { }
+@media (max-width: 640px){ .br-m { display: inline; } .pc-only { display: none; } }
+/* WYSIWYG line breaks: source newlines (Enter in preview) render as real breaks
+   so edits persist verbatim into downloads. */
+.hero-lead, .bcard p, .section-head p, .band-lead, .product-tagline,
+.gift .gv, .spec-grid .v, .feat li, .note-list li, .footer-info,
+.summary td, .price-orig, .company-table dd, #contact .contact-aside p {
+  white-space: pre-line;
+}
+body {
+  margin: 0;
+  font-family: var(--sans);
+  background: var(--page-bg);
+  color: var(--page-text);
+  -webkit-font-smoothing: antialiased;
+  line-height: 1.6;
+  letter-spacing: -0.01em;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
+  transition: background .5s ease, color .5s ease;
+}
+img { display: block; max-width: 100%; }
+a { color: inherit; text-decoration: none; }
+.wrap { width: 100%; max-width: var(--maxw); margin: 0 auto; padding-left: var(--pad-x); padding-right: var(--pad-x); }
+
+.eyebrow {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 15px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-text);
+  margin: 0 0 18px;
+  display: inline-block;
+}
+.eyebrow--plain { font-style: normal; letter-spacing: 0.26em; }
+
+.display {
+  font-family: var(--display);
+  font-weight: var(--display-weight);
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+/* ---------- nav ---------- */
+.nav {
+  position: sticky; top: 0; z-index: 50;
+  background: var(--nav-bg);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-bottom: 1px solid var(--nav-border);
+  transition: background .5s ease, border-color .5s ease;
+  padding-top: env(safe-area-inset-top, 0px);
+}
+.nav-inner { display: flex; align-items: center; justify-content: space-between; height: 88px; }
+.nav-logo-link { display: inline-flex; align-items: center; }
+.nav-logo-slot { width: 208px; height: 44px; --slot-radius: 0px; }
+.nav-logo-slot::part(empty) { background: transparent; }
+.nav-logo-slot::part(frame), .footer-logo-slot::part(frame) { background: transparent; }
+.nav-links { display: flex; align-items: center; gap: 30px; }
+.nav-links a { font-size: 15px; font-weight: 600; color: var(--nav-text); opacity: .82; transition: opacity .2s, color .2s; }
+.nav-links a:hover { opacity: 1; color: var(--accent-text); }
+.nav-cta { display: inline-flex; align-items: center; gap: 8px; }
+@media (max-width: 860px){ .nav-links .lnk { display: none; } }
+
+/* ---------- buttons ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  font-family: var(--sans); font-weight: 700; font-size: 15px; letter-spacing: -0.01em;
+  padding: 14px 26px; border-radius: 999px; border: 1.5px solid transparent;
+  cursor: pointer; transition: transform .18s ease, background .2s, color .2s, border-color .2s, box-shadow .2s;
+  white-space: nowrap;
+}
+.btn:hover { transform: translateY(-2px); }
+.btn-accent { background: var(--accent); color: var(--on-accent); box-shadow: 0 14px 30px -14px var(--accent); }
+.btn-accent:hover { background: var(--accent-deep); }
+.btn-ghost { background: transparent; border-color: currentColor; color: inherit; opacity: .9; }
+.btn-ghost:hover { opacity: 1; background: color-mix(in srgb, currentColor 10%, transparent); }
+.btn-sm { padding: 10px 18px; font-size: 13.5px; }
+
+/* ---------- hero ---------- */
+.hero {
+  position: relative; overflow: hidden;
+  background: var(--hero-bg); color: var(--hero-text);
+  transition: background .5s ease, color .5s ease;
+}
+.hero::before { display: none; }
+.hero-confetti { position: absolute; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+.hero-confetti i { position: absolute; display: block; line-height: 0; opacity: .92; }
+body[data-variant="dark"] .hero-confetti i { opacity: .85; }
+.hero-confetti i.show-sm { display: none; }
+@media (max-width: 880px){ .hero-confetti i.hide-sm { display: none; } .hero-confetti i.show-sm { display: block; } }
+.hero-inner { position: relative; z-index: 1; display: grid; grid-template-columns: 1.05fr 0.95fr; gap: 56px; align-items: center; padding: clamp(56px, 8vw, 104px) 0 clamp(48px,7vw,88px); }
+.hero-kicker { display: inline-flex; align-items: center; gap: 10px; font-size: 13.5px; font-weight: 600; letter-spacing: 0.04em; color: var(--hero-muted); border: 1px solid var(--line); padding: 7px 15px; border-radius: 999px; margin-bottom: 26px; }
+.hero-kicker .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); }
+.hero h1 { margin: 0 0 24px; font-size: clamp(40px, 5.4vw, 74px); }
+.hero h1 .accent { color: var(--accent-text); }
+.hero-lead { font-size: clamp(17px, 1.5vw, 20px); color: var(--hero-muted); max-width: 30em; margin: 0 0 36px; line-height: 1.7; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 14px; }
+.hero-visual { position: relative; z-index: 2; }
+.hero-visual image-slot { display: block; width: 100%; height: auto; aspect-ratio: 4/5; border-radius: 18px; background: color-mix(in srgb, var(--accent) 12%, var(--card-bg)); border: 1px solid var(--card-border); box-shadow: var(--card-shadow); overflow: hidden; }
+.hero-badge {
+  position: absolute; left: -18px; bottom: 28px;
+  background: var(--accent); color: var(--on-accent);
+  border-radius: 16px; padding: 16px 22px; box-shadow: 0 22px 50px -24px rgba(0,0,0,.5);
+  transform: rotate(-3deg);
+}
+.hero-badge .big { font-family: var(--display); font-weight: 850; font-size: 34px; line-height: 1; }
+.hero-badge .lbl { font-size: 13px; font-weight: 700; opacity: .8; margin-top: 4px; }
+@media (max-width: 880px){ .hero-inner { grid-template-columns: 1fr; gap: 38px; } .hero-visual image-slot { aspect-ratio: 16/10; } .hero-badge{ left:auto; right:18px; } }
+
+/* ---------- phone tuning ---------- */
+@media (max-width: 640px){
+  /* nav: smaller logo + compact CTA */
+  .nav-inner { height: 62px; }
+  .nav-logo-slot { width: 148px; height: 32px; }
+  .nav-cta.btn-sm { padding: 8px 14px; font-size: 12.5px; }
+  .nav-links { gap: 0; }
+
+  /* hero: center everything */
+  .hero-inner { text-align: center; gap: 30px; }
+  .hero-copy { display: flex; flex-direction: column; align-items: center; }
+  .hero-kicker { margin-bottom: 20px; }
+  .hero h1 { font-size: clamp(30px, 8.4vw, 40px); margin-bottom: 18px; }
+  .hero-lead { margin: 0 auto 28px; max-width: 34em; }
+  .hero-actions { justify-content: center; width: 100%; }
+  .hero-actions .btn { flex: 1; min-width: 0; }
+  .hero-visual { display: flex; justify-content: center; }
+  .hero-visual image-slot { max-width: 100%; }
+}
+
+/* ---------- stat strip ---------- */
+.stats { background: var(--band-bg); color: var(--band-text); transition: background .5s; }
+.stats-inner { display: grid; grid-template-columns: repeat(4, 1fr); }
+.stat { padding: 30px 26px; border-left: 1px solid var(--line); }
+.stat:first-child { border-left: none; }
+.stat .num { font-family: var(--display); font-weight: 850; font-size: clamp(28px, 3vw, 40px); line-height: 1; color: var(--accent-text); }
+.stat .cap { font-size: 14px; color: var(--band-muted); margin-top: 10px; font-weight: 600; letter-spacing: 0.01em; }
+@media (max-width: 720px){ .stats-inner { grid-template-columns: repeat(2, 1fr); } .stat:nth-child(3){ border-left: none; } }
+
+/* ---------- section scaffolding ---------- */
+.section { padding: clamp(64px, 9vw, 120px) 0; }
+.section--alt { background: var(--alt-bg); transition: background .5s; }
+.section-head { max-width: 720px; margin-bottom: clamp(40px, 5vw, 64px); }
+.section-head h2 { margin: 0 0 18px; font-size: clamp(30px, 3.6vw, 48px); font-family: var(--display); font-weight: var(--display-weight); line-height: 1.1; letter-spacing: -0.02em; }
+.section-head p { margin: 0; font-size: clamp(16px, 1.4vw, 18.5px); color: var(--page-muted); line-height: 1.7; }
+.section-num { font-family: var(--serif); font-style: italic; font-size: 15px; color: var(--accent-text); letter-spacing: 0.05em; }
+
+/* ---------- benefits ---------- */
+.benefits { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px; }
+.bcard {
+  background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 20px;
+  padding: 30px 26px 32px; box-shadow: var(--card-shadow); transition: transform .22s ease, box-shadow .22s ease;
+}
+.bcard:hover { transform: translateY(-5px); }
+.bcard .idx { font-family: var(--serif); font-style: italic; color: var(--accent-text); font-size: 17px; }
+.bcard h3 { margin: 16px 0 10px; font-size: 20px; font-weight: 800; letter-spacing: -0.02em; line-height: 1.3; }
+.bcard p { margin: 0; font-size: 14.5px; color: var(--card-muted); line-height: 1.65; }
+.bcard .big { font-family: var(--display); font-weight: 850; font-size: 40px; color: var(--accent-text); line-height: 1; margin-bottom: 4px; }
+@media (max-width: 980px){ .benefits { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 520px){ .benefits { grid-template-columns: 1fr; } }
+
+/* ---------- company ---------- */
+.company { display: grid; grid-template-columns: 0.8fr 1.2fr; gap: clamp(32px, 5vw, 72px); align-items: start; }
+.company-table { display: grid; grid-template-columns: max-content 1fr; gap: 0; border-top: 1.5px solid var(--line); }
+.company-table dt { padding: 16px 0; font-size: 14px; font-weight: 700; color: var(--accent-text); border-bottom: 1px solid var(--line); padding-right: 28px; letter-spacing: 0.02em; }
+.company-table dd { padding: 16px 0; margin: 0; font-size: 15.5px; border-bottom: 1px solid var(--line); color: var(--page-text); }
+.chips { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 22px; }
+.chip { font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); color: var(--page-muted); text-decoration: none; cursor: pointer; text-align: center; transition: border-color .18s, color .18s, background .18s, transform .18s; }
+a.chip:hover { border-color: var(--accent); color: var(--accent-text); background: color-mix(in srgb, var(--accent) 9%, transparent); transform: translateY(-1px); }
+@media (max-width: 820px){ .company { grid-template-columns: 1fr; } }
+
+/* ---------- products ---------- */
+.product { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(34px, 5vw, 72px); align-items: center; padding: clamp(48px,6vw,80px) 0; border-top: 1px solid var(--line); scroll-margin-top: 92px; }
+@keyframes chipTargetGlow { 0%,100% { box-shadow: 0 0 0 0 transparent; } 18% { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 32%, transparent); } }
+.product:target { animation: chipTargetGlow 1.4s ease; border-radius: 20px; }
+.product:first-of-type { border-top: none; }
+.product--rev .product-media { order: 2; }
+.product-media { position: relative; }
+.product-media image-slot { width: 100%; height: auto; aspect-ratio: 4/3; border-radius: 20px; box-shadow: var(--card-shadow); background: color-mix(in srgb, var(--accent) 12%, var(--card-bg)); }
+.product-media .tag { position: absolute; top: 16px; left: 16px; background: var(--band-bg); color: var(--band-text); font-size: 12.5px; font-weight: 700; padding: 7px 13px; border-radius: 999px; letter-spacing: 0.02em; white-space: nowrap; }
+.product-index { font-family: var(--display); font-weight: 850; font-size: clamp(40px, 5vw, 64px); line-height: .9; color: var(--accent-text); opacity: .9; }
+.product-en { font-family: var(--serif); font-style: italic; color: var(--page-muted); font-size: 16px; margin: 14px 0 6px; }
+.product h3 { margin: 0 0 14px; font-size: clamp(24px, 2.6vw, 34px); font-family: var(--display); font-weight: var(--display-weight); letter-spacing: -0.02em; line-height: 1.15; }
+.product-tagline { font-size: 16.5px; color: var(--page-muted); margin: 0 0 26px; line-height: 1.6; }
+
+.price-block { display: flex; align-items: flex-end; flex-wrap: wrap; gap: 18px 22px; padding: 22px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); margin-bottom: 26px; }
+.price-orig { font-size: 15px; color: var(--page-muted); }
+.price-orig s { color: var(--strike); }
+.price-now { display: flex; align-items: baseline; gap: 4px; white-space: nowrap; }
+.price-now .won { font-family: var(--display); font-weight: 850; font-size: clamp(34px, 4vw, 48px); color: var(--page-text); line-height: 1; letter-spacing: -0.03em; }
+.price-now .unit { font-size: 16px; color: var(--page-muted); font-weight: 600; }
+.disc-badge { background: var(--accent); color: var(--on-accent); font-family: var(--display); font-weight: 850; font-size: 19px; padding: 8px 14px; border-radius: 12px; }
+.price-pair { display: flex; flex-direction: column; gap: 6px; }
+.fee-chip { display: inline-flex; align-items: center; gap: 7px; font-size: 13.5px; font-weight: 700; color: var(--page-muted); white-space: nowrap; }
+.fee-chip b { color: var(--accent-text); }
+
+.feat { list-style: none; padding: 0; margin: 0 0 26px; display: grid; gap: 11px; }
+.feat li { position: relative; padding-left: 26px; font-size: 15px; line-height: 1.55; color: var(--card-text); }
+.feat li::before { content: ""; position: absolute; left: 0; top: 9px; width: 13px; height: 13px; border-radius: 50%; border: 2px solid var(--accent); }
+.feat li::after { content: ""; position: absolute; left: 5px; top: 14px; width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+
+.spec-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; margin-bottom: 22px; }
+.spec-grid .cell { background: var(--card-bg); padding: 14px 16px; }
+.spec-grid .k { font-size: 12px; font-weight: 700; color: var(--accent-text); letter-spacing: 0.03em; margin-bottom: 5px; }
+.spec-grid .v { font-size: 14px; color: var(--card-text); line-height: 1.4; }
+
+.gift { display: flex; gap: 12px; align-items: flex-start; padding: 16px 18px; border-radius: 14px; background: color-mix(in srgb, var(--accent) 13%, transparent); border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent); margin-bottom: 22px; }
+.gift .gk { font-size: 12.5px; font-weight: 800; color: var(--accent-text); white-space: nowrap; padding-top: 1px; }
+.gift .gv { font-size: 14px; line-height: 1.55; color: var(--card-text); }
+.store-link { display: inline-flex; align-items: center; gap: 8px; font-size: 14.5px; font-weight: 700; color: var(--accent-text); }
+.store-link:hover { color: var(--accent-deep); }
+.store-link .arr { transition: transform .2s; }
+.store-link:hover .arr { transform: translateX(4px); }
+@media (max-width: 820px){ .product { grid-template-columns: 1fr; } .product--rev .product-media { order: 0; } .spec-grid { grid-template-columns: 1fr; } }
+
+/* ---------- summary table ---------- */
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 18px; background: var(--card-bg); box-shadow: var(--card-shadow); }
+table.summary { width: 100%; border-collapse: collapse; min-width: 860px; font-size: 14.5px; }
+table.summary thead th { background: var(--band-bg); color: var(--band-text); font-weight: 700; text-align: left; padding: 18px 18px; font-size: 13.5px; letter-spacing: 0.02em; white-space: nowrap; }
+table.summary tbody td { padding: 18px 18px; border-top: 1px solid var(--line); vertical-align: top; color: var(--card-text); }
+table.summary tbody tr:hover { background: color-mix(in srgb, var(--accent) 7%, transparent); }
+table.summary .pname { font-weight: 800; font-size: 15px; }
+table.summary .pname small { display:block; font-weight:600; color: var(--card-muted); font-size:12.5px; margin-top:3px; }
+table.summary .now { font-family: var(--display); font-weight: 850; color: var(--accent-text); font-size: 16px; }
+table.summary .orig s { color: var(--strike); }
+table.summary .disc { font-weight: 800; color: var(--page-text); }
+table.summary .lnk { color: var(--accent-text); font-weight: 700; white-space: nowrap; }
+.table-note { margin-top: 18px; font-size: 14px; color: var(--page-muted); line-height: 1.7; }
+.note-list { margin: 18px 0 0; padding: 0; list-style: none; display: grid; gap: 9px; }
+.note-list li { position: relative; padding-left: 22px; font-size: 14px; color: var(--page-muted); line-height: 1.7; }
+.note-list li::before { content: "◎"; position: absolute; left: 0; top: 0; color: var(--accent-text); font-size: 13px; }
+.note-list b { color: var(--accent-text); }
+.ship-callout { display: flex; align-items: center; gap: 16px; margin-top: 20px; padding: 18px 22px; border-radius: 16px; background: color-mix(in srgb, var(--accent) 12%, var(--card-bg)); border: 1px solid color-mix(in srgb, var(--accent) 34%, transparent); }
+.ship-callout .ship-ic { width: 44px; height: 44px; flex: none; border-radius: 12px; display: grid; place-items: center; background: var(--accent); color: var(--on-accent); }
+.ship-items { display: flex; align-items: center; flex-wrap: wrap; gap: 10px 20px; font-size: 15.5px; color: var(--page-text); }
+.ship-item b { color: var(--accent-text); font-weight: 800; }
+.ship-sep { width: 1px; height: 18px; background: var(--line); }
+@media (max-width: 560px){ .ship-sep { display: none; } .ship-items { gap: 6px; flex-direction: column; align-items: flex-start; } }
+@media (max-width: 640px){
+  .ship-callout { padding: 14px 16px; gap: 12px; }
+  .ship-callout .ship-ic { width: 38px; height: 38px; }
+  .ship-callout .ship-ic svg { width: 19px; height: 19px; }
+  .ship-items { font-size: 12.5px; }
+  .note-list li { font-size: 13px; padding-left: 20px; }
+}
+.table-note b { color: var(--accent-text); }
+
+/* ---------- commission band ---------- */
+.band { background: var(--band-bg); color: var(--band-text); transition: background .5s; }
+.band-inner { padding-top: clamp(56px,7vw,96px); padding-bottom: clamp(56px,7vw,96px); }
+.band .eyebrow { color: var(--accent-text); }
+.band h2 { font-family: var(--display); font-weight: var(--display-weight); font-size: clamp(28px,3.4vw,44px); margin: 0 0 16px; line-height: 1.12; }
+.band-lead { color: var(--band-muted); font-size: 17px; max-width: 40em; margin: 0 0 44px; line-height: 1.7; }
+.tiers { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.tier { border: 1px solid var(--line); border-radius: 18px; padding: 28px 26px; position: relative; }
+.tier.is-hi { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, transparent); }
+.tier .cond { font-size: 14px; color: var(--band-muted); font-weight: 600; }
+.tier .rate { font-family: var(--display); font-weight: 850; font-size: clamp(36px,4vw,52px); color: var(--accent-text); line-height: 1; margin: 14px 0 6px; }
+.tier .total { font-size: 14.5px; color: var(--band-text); font-weight: 600; }
+@media (max-width: 760px){ .tiers { grid-template-columns: 1fr; } }
+
+/* summary table → stacked cards on mobile */
+@media (max-width: 680px){
+  .table-wrap { overflow: visible; border: none; background: transparent; box-shadow: none; border-radius: 0; }
+  table.summary { min-width: 0; width: 100%; font-size: 14.5px; }
+  table.summary thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  table.summary tbody { display: flex; flex-direction: column; gap: 16px; }
+  table.summary tr { display: block; border: 1px solid var(--line); border-radius: 18px; background: var(--card-bg); box-shadow: var(--card-shadow); overflow: hidden; }
+  table.summary tr:hover { background: var(--card-bg); }
+  table.summary td { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding: 12px 18px; border-top: 1px solid var(--line); text-align: right; }
+  table.summary td::before { content: attr(data-label); font-size: 12.5px; font-weight: 700; letter-spacing: 0.02em; color: var(--accent-text); text-align: left; flex: none; }
+  table.summary td.pname { display: block; text-align: left; background: color-mix(in srgb, var(--accent) 9%, var(--card-bg)); border-top: none; padding: 16px 18px; font-size: 17px; }
+  table.summary td.pname::before { display: none; }
+  table.summary td.pname small { display: inline; margin-left: 8px; }
+  table.summary .now { font-size: 17px; }
+  table.summary td[data-label="사은품"] { flex-direction: column; align-items: stretch; text-align: left; gap: 4px; }
+  table.summary td[data-label="사은품"]::before { text-align: left; }
+}
+
+/* ---------- contact ---------- */
+.contact { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(34px,5vw,72px); align-items: start; }
+.contact-aside h2 { font-family: var(--display); font-weight: var(--display-weight); font-size: clamp(30px,3.6vw,46px); margin: 0 0 18px; line-height: 1.1; }
+.contact-aside p { color: var(--page-muted); font-size: 17px; line-height: 1.7; margin: 0 0 30px; max-width: 26em; }
+.contact-methods { display: grid; gap: 14px; }
+.cmethod { display: flex; align-items: center; gap: 16px; padding: 18px 20px; border: 1px solid var(--line); border-radius: 16px; background: var(--card-bg); transition: border-color .2s, transform .2s; }
+.cmethod:hover { border-color: var(--accent); transform: translateY(-2px); }
+.cmethod .ic { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--accent-text); flex: none; }
+body[data-variant="dark"] .cmethod .ic { color: var(--accent); }
+.cmethod .ck { font-size: 12.5px; color: var(--page-muted); font-weight: 600; }
+.cmethod .cv { font-size: 17px; font-weight: 800; letter-spacing: -0.01em; }
+
+.form { background: var(--card-bg); border: 1px solid var(--card-border); border-radius: 22px; padding: clamp(26px,3vw,38px); box-shadow: var(--card-shadow); }
+.form .row { display: grid; gap: 7px; margin-bottom: 18px; }
+.form .row.two { grid-template-columns: 1fr 1fr; gap: 16px; }
+.form label { font-size: 13px; font-weight: 700; color: var(--page-text); letter-spacing: 0.01em; }
+.form input, .form textarea {
+  font-family: var(--sans); font-size: 15px; color: var(--page-text);
+  background: var(--page-bg); border: 1px solid var(--line); border-radius: 12px;
+  padding: 13px 15px; width: 100%; transition: border-color .2s, box-shadow .2s;
+}
+.form input:focus, .form textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 25%, transparent); }
+.form textarea { resize: vertical; min-height: 96px; }
+.form .btn { width: 100%; margin-top: 6px; }
+.form .req { color: var(--accent-text); font-weight: 800; }
+.form-err { display: none; margin: 0 0 4px; font-size: 13.5px; font-weight: 600; color: #c0392b; line-height: 1.5; }
+.form-err.show { display: block; }
+.form-err a { color: var(--accent-text); font-weight: 700; text-decoration: underline; }
+.form-note { margin: 12px 0 0; font-size: 12.5px; color: var(--page-muted); text-align: center; line-height: 1.5; }
+.btn:disabled { opacity: .6; cursor: progress; transform: none; }
+.form-done { display: none; text-align: center; padding: 30px 10px; }
+.form-done .ok { width: 60px; height: 60px; border-radius: 50%; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; margin: 0 auto 18px; }
+.form-done h4 { margin: 0 0 8px; font-size: 21px; font-weight: 800; }
+.form-done p { margin: 0; color: var(--page-muted); font-size: 15px; line-height: 1.6; }
+.form.sent .form-fields { display: none; }
+.form.sent .form-done { display: block; }
+@media (max-width: 820px){ .contact { grid-template-columns: 1fr; } .form .row.two { grid-template-columns: 1fr; } }
+
+/* ---------- footer ---------- */
+.footer { background: var(--band-bg); color: var(--band-text); padding: clamp(48px,6vw,72px) 0 40px; transition: background .5s; }
+.footer-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 40px; flex-wrap: wrap; padding-bottom: 36px; border-bottom: 1px solid var(--line); }
+.footer-logo-link { display: inline-flex; }
+.footer-logo-slot { width: 190px; height: 40px; --slot-radius: 0px; }
+.footer-logo-slot::part(empty) { background: transparent; }
+.footer-info { font-size: 14px; color: var(--band-muted); line-height: 1.8; text-align: right; }
+.footer-info b { color: var(--band-text); font-weight: 700; }
+.footer-bottom { padding-top: 26px; font-size: 13px; color: var(--band-muted); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 10px; }
+@media (max-width: 620px){ .footer-info { text-align: left; } }
+
+/* ---------- reveal ---------- */
+.reveal { opacity: 0; transform: translateY(26px); transition: opacity .7s cubic-bezier(.22,.61,.36,1), transform .7s cubic-bezier(.22,.61,.36,1); }
+.reveal.in { opacity: 1; transform: none; }
+
+/* slot placeholder hint (injected by script; hidden once filled) */
+.slot-hint { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 9px; pointer-events: none; text-align: center; padding: 24px; }
+.slot-hint .ic { color: var(--accent); opacity: .9; }
+.slot-hint .t { font-size: 14.5px; font-weight: 700; color: var(--page-muted); line-height: 1.45; max-width: 88%; }
+body[data-variant="dark"] .slot-hint .t { color: var(--card-muted); }
+.slot-hint .s { font-size: 12.5px; font-weight: 600; color: var(--accent-text); }
+
+/* tweaks panel sits above everything */
+#tweaks-root { position: relative; z-index: 100; }
+</style>
+</head>
+<body data-variant="minimal">
+
+ <!-- ============ NAV ============ -->
+ <header class="nav">
+ <div class="wrap nav-inner">
+  <a href="#top" class="nav-logo-link" aria-label="STICORNY">
+  <image-slot id="nav-logo" class="nav-logo-slot" shape="rect" fit="contain" src="assets/logo-gold.png" placeholder="로고" style="opacity: 1"></image-slot>
+  </a>
+  <nav class="nav-links">
+  <a class="lnk" href="#benefits">제안 혜택</a>
+  <a class="lnk" href="#company">회사 소개</a>
+  <a class="lnk" href="#products">제품</a>
+  <a class="lnk" href="#summary">종합 안내</a>
+  <a class="btn btn-accent btn-sm nav-cta" href="#contact">제휴 문의</a>
+  </nav>
+ </div>
+ </header>
+
+ <!-- ============ HERO ============ -->
+ <section class="hero" id="top" style="font-family: &quot;Pretendard Variable&quot;">
+ <div class="hero-confetti" aria-hidden="true">
+  <i style="left:3%;top:9%" class="hide-sm"><svg width="34" height="30" viewBox="0 0 34 30"><path d="M17 29C6 21 2 13 5 7c2-5 9-5 12 0 3-5 10-5 12 0 3 6-1 14-12 22Z" fill="#E0563C"></path></svg></i>
+  <i style="left:36%;top:6%" class="hide-sm"><svg width="48" height="26" viewBox="0 0 48 26"><path d="M4 13C4 4 16 4 16 13s12 9 12 0 12-9 12 0 4 9 4 9" stroke="#F4C144" stroke-width="6" fill="none" stroke-linecap="round"></path></svg></i>
+  <i style="left:50%;top:13%"><svg width="22" height="22" viewBox="0 0 22 22"><circle cx="11" cy="11" r="9" fill="#E8773E"></circle></svg></i>
+  <i style="left:60%;top:4%" class="hide-sm"><svg width="70" height="44" viewBox="0 0 70 44"><path d="M35 6C12 0 4 30 22 34c14 3 16-20 2-22-16-2-24 22-6 28" stroke="#2C2117" stroke-width="3" fill="none" stroke-linecap="round" stroke-dasharray="2 11"></path></svg></i>
+  <i style="right:3%;top:21%"><svg width="32" height="28" viewBox="0 0 32 28"><path d="M4 6l24 8-20 16Z" fill="#4A90D9"></path></svg></i>
+  <i style="right:1.5%;top:52%" class="hide-sm"><svg width="40" height="40" viewBox="0 0 40 40"><path d="M6 22C6 11 18 11 18 22s14 9 14-2" stroke="#9B6FC2" stroke-width="6" fill="none" stroke-linecap="round"></path></svg></i>
+  <i style="right:7%;top:80%"><svg width="46" height="26" viewBox="0 0 46 26"><path d="M4 13C4 4 15 4 15 13s11 9 11 0 11-9 11 0 4 9 4 9" stroke="#F4C144" stroke-width="6" fill="none" stroke-linecap="round"></path></svg></i>
+  <i style="left:1%;top:60%"><svg width="20" height="20" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#E05A4A"></circle></svg></i>
+  <i style="left:11%;top:93%" class="hide-sm"><svg width="40" height="22" viewBox="0 0 40 22"><path d="M4 11C4 3 14 3 14 11s10 8 10 0 10-8 10 0" stroke="#9B6FC2" stroke-width="5" fill="none" stroke-linecap="round"></path></svg></i>
+  <i style="left:43%;top:33%" class="hide-sm"><svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="#F4C144"></circle></svg></i>
+  <i style="right:14%;top:7%" class="hide-sm"><svg width="26" height="24" viewBox="0 0 26 24"><path d="M13 23C4 16 1 10 3 5c2-4 7-4 10 0 3-4 8-4 10 0 2 5-1 11-10 18Z" fill="#E0563C"></path></svg></i>
+  <i style="left:30%;top:90%" class="hide-sm"><svg width="18" height="18" viewBox="0 0 18 18"><circle cx="9" cy="9" r="7" fill="#4A90D9"></circle></svg></i>
+  <!-- mobile-only confetti — placed along edges, clear of centered text -->
+  <i style="left:5%;top:3%" class="show-sm"><svg width="34" height="19" viewBox="0 0 48 26"><path d="M4 13C4 4 16 4 16 13s12 9 12 0 12-9 12 0 4 9 4 9" stroke="#F4C144" stroke-width="6" fill="none" stroke-linecap="round"></path></svg></i>
+  <i style="right:5%;top:2.5%" class="show-sm"><svg width="24" height="21" viewBox="0 0 32 28"><path d="M4 6l24 8-20 16Z" fill="#4A90D9"></path></svg></i>
+  <i style="left:3%;top:33%" class="show-sm"><svg width="22" height="20" viewBox="0 0 26 24"><path d="M13 23C4 16 1 10 3 5c2-4 7-4 10 0 3-4 8-4 10 0 2 5-1 11-10 18Z" fill="#E0563C"></path></svg></i>
+  <i style="right:3%;top:30%" class="show-sm"><svg width="30" height="30" viewBox="0 0 40 40"><path d="M6 22C6 11 18 11 18 22s14 9 14-2" stroke="#9B6FC2" stroke-width="6" fill="none" stroke-linecap="round"></path></svg></i>
+  <i style="left:6%;top:50%" class="show-sm"><svg width="18" height="18" viewBox="0 0 20 20"><circle cx="10" cy="10" r="8" fill="#E8773E"></circle></svg></i>
+  <i style="right:5%;top:52%" class="show-sm"><svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="6" fill="#F4C144"></circle></svg></i>
+ </div>
+ <div class="wrap hero-inner">
+  <div class="hero-copy">
+  <span class="hero-kicker"><span class="dot"></span>Premium Name Sticker &amp; Stamp</span>
+  <h1 class="display">아이의 이름을<br>가장 <span class="accent">예쁘게</span>,<br>스티코니 <br>공동구매 제안</h1>
+  <p class="hero-lead">코니츄 네임 라인업 4종을 공동구매 전용가로 제안합니다.<br>최대 34% 할인과 매출별 추가 수수료, 검증된 인증 품질까지<br>셀러님께 유리한 조건으로 준비했습니다.</p>
+  <div class="hero-actions">
+   <a class="btn btn-accent" href="#contact">공동구매 제휴 문의</a>
+   <a class="btn btn-ghost" href="#products">제품 살펴보기</a>
+  </div>
+  </div>
+  <div class="hero-visual">
+  <image-slot id="hero-visual" shape="rounded" radius="18" fit="contain" src="images/hero.webp" style="background: #ffffff; width: 100%; max-width: 500px; aspect-ratio: 1 / 1; height: auto" placeholder="대표 이미지 (코니츄/제품 컷)를 드래그하세요"></image-slot>
+  <div class="hero-badge">
+   <div class="big">34%</div>
+   <div class="lbl">공동구매 최대 할인</div>
+  </div>
+  </div>
+ </div>
+ </section>
+
+ <!-- ============ STAT STRIP ============ -->
+ <div class="stats">
+ <div class="wrap stats-inner">
+  <div class="stat"><div class="num">34%</div><div class="cap">공동구매 최대 할인율</div></div>
+  <div class="stat"><div class="num">15%</div><div class="cap">기본 공동구매 수수료</div></div>
+  <div class="stat"><div class="num">18%</div><div class="cap">매출 달성 시 최대 수수료</div></div>
+  <div class="stat"><div class="num">54종</div><div class="cap">코니츄 디자인 (UV 스티커)</div></div>
+ </div>
+ </div>
+
+ <!-- ============ BENEFITS ============ -->
+ <section class="section section--alt" id="benefits">
+ <div class="wrap">
+  <div class="section-head reveal">
+  <span class="eyebrow">Why STICORNY</span>
+  <h2 class="display">셀러님께 유리한<br>네 가지 제안 조건</h2>
+  <p>할인율부터 수수료, 품질 인증, 사은품까지 <br>— 공동구매를 안정적으로 운영할 수 있도록 핵심 조건을 구성했습니다.</p>
+  </div>
+  <div class="benefits">
+  <article class="bcard reveal">
+   <div class="big">34%</div>
+   <h3>최대 34% 공동구매 할인</h3>
+   <p>상시 판매가 대비 최대 34%
+인하한 공동구매 전용가로 
+제안합니다.</p>
+  </article>
+  <article class="bcard reveal">
+   <div class="big">18%</div>
+   <h3>매출별 추가 수수료</h3>
+   <p>기본 15%에 전 품목 
+합산 매출 달성 시 
+최대 +3%, 
+총 18%까지 제공합니다.</p>
+  </article>
+  <article class="bcard reveal">
+   <div class="idx">Certified</div>
+   <h3>인증으로 검증된 품질</h3>
+   <p>KC 어린이제품 적합성 인증, 그린가드 골드 필름 방수
+세탁에 강한 부착력</p>
+  </article>
+  <article class="bcard reveal">
+   <div class="idx">Bonus</div>
+   <h3>풍성한 사은품, 합배송</h3>
+   <p>구매 ID별 기본 사은품과 
+추가 증정 
+전 품목 합배송으로 
+운영 부담을 낮춥니다.</p>
+  </article>
+  </div>
+ </div>
+ </section>
+
+ <!-- ============ COMPANY ============ -->
+ <section class="section" id="company">
+ <div class="wrap company">
+  <div class="section-head reveal" style="margin-bottom:0">
+  <span class="eyebrow">Company</span>
+  <h2 class="display">회사 소개</h2>
+  <p>인쇄, 생활용품 제조 기반의 브랜드 스티코니가 
+직접 제안하고 제작, 배송까지 책임집니다.</p>
+  </div>
+  <div class="reveal">
+  <dl class="company-table">
+   <dt>회사명</dt><dd>주식회사 라이프비기닝 고양지점</dd>
+   <dt>브랜드</dt><dd>스티코니 (STICORNY)</dd>
+   <dt>업종</dt><dd>제조업, 인쇄업 외</dd>
+   <dt>주품목</dt><dd>인쇄물, 생활용품, 의료기기 등</dd>
+   <dt>대표자</dt><dd>김재근</dd>
+   <dt>연락처</dt><dd>070-4571-8792</dd>
+   <dt>제조국</dt><dd>대한민국, 과세 구분 과세</dd>
+  </dl>
+  <div class="chips">
+   <a class="chip" href="#item-cut">잘라쓰는 UV 네임스티커</a>
+   <a class="chip" href="#item-peel">떼어쓰는 UV 네임스티커</a>
+   <a class="chip" href="#item-cloth-sticker">의류용 네임스티커</a>
+   <a class="chip" href="#item-cloth-stamp">의류용 네임스탬프</a>
+  </div>
+  </div>
+ </div>
+ </section>
+
+ <!-- ============ PRODUCTS ============ -->
+ <section class="section section--alt" id="products">
+ <div class="wrap">
+  <div class="section-head reveal">
+  <span class="eyebrow">Product Lineup</span>
+  <h2 class="display">공동구매 제안 제품 4종</h2>
+  <p>코니츄 네임스티커부터 의류용 네임스탬프까지. 각 제품의 공동구매가와 조건을 정리했습니다.</p>
+  </div>
+
+  <!-- Product 1 -->
+  <article id="item-cut" class="product reveal">
+  <div class="product-media">
+   <image-slot src="images/prod-1-uv-cut.webp" id="prod-1" shape="rounded" radius="20" placeholder="UV 네임스티커(잘라쓰는) 사진"></image-slot>
+   <span class="tag">BEST, 34% 할인</span>
+  </div>
+  <div class="product-body">
+   <div class="product-index">03</div>
+   <p class="product-en">UV Name Sticker, Cut Type</p>
+   <h3 class="display">잘라쓰는 UV 네임스티커</h3>
+   <p class="product-tagline">배경 없이 어디에나 깔끔하게 붙는 코니츄 네임스티커.</p>
+   <div class="price-block">
+   <div class="price-pair">
+    <span class="price-orig">일반가 <s>5,900원</s> / 1장</span>
+    <span class="price-now"><span class="won">3,900원</span><span class="unit">/ 1장</span></span>
+   </div>
+   <span class="disc-badge">34% ↓</span>
+   <span class="fee-chip">공동구매 수수료 <b>15%</b></span>
+   </div>
+   <ul class="feat">
+   <li>초고해상도 최대 3,200dpi UV 인쇄</li>
+   <li>배경 없이 어디에나 깔끔한 부착</li>
+   <li>KC 기타 어린이제품 적합성 인증 완료 <br class="br-m">(유해물질 전체 미검출)</li>
+   <li>방수 기본 — 세척에도 강력한 부착력 유지</li>
+   <li>식기세척기, UV소독기, 전자레인지(2분 이내) 사용 가능</li>
+   </ul>
+   <div class="spec-grid">
+   <div class="cell"><div class="k">사이즈</div><div class="v">14.2 × 20.8cm (A5)</div></div>
+   <div class="cell"><div class="k">재질</div><div class="v">UV / 필름</div></div>
+   <div class="cell"><div class="k">종류</div><div class="v">54종 디자인</div></div>
+   </div>
+   <div class="gift">
+   <span class="gk">사은품</span>
+   <span class="gv">기본 - A5 L홀더 1장, 조미료 스티커 12종 꾸미기 연습용 스티커<br>+ 4장 이상 구매 시 요술양말 1개 증정</span>
+   </div>
+   <a class="store-link" href="https://smartstore.naver.com/sticorny/products/12702901487" target="_blank" rel="noopener">스마트스토어에서 보기 <span class="arr">→</span></a>
+  </div>
+  </article>
+
+  <!-- Product 2 -->
+  <article id="item-peel" class="product product--rev reveal">
+  <div class="product-media">
+   <image-slot src="images/prod-2-uv-peel.webp" id="prod-2" shape="rounded" radius="20" placeholder="UV 네임스티커(떼어쓰는) 사진"></image-slot>
+   <span class="tag">30% 할인</span>
+  </div>
+  <div class="product-body">
+   <div class="product-index">04</div>
+   <p class="product-en">UV Name Sticker, Peel Type</p>
+   <h3 class="display">떼어쓰는 UV 네임스티커</h3>
+   <p class="product-tagline">가위 없이 손으로 바로 떼어 쓰는 반컷팅 코니츄 네임스티커.</p>
+   <div class="price-block">
+   <div class="price-pair">
+    <span class="price-orig">일반가 <s>7,900원</s> / 1장</span>
+    <span class="price-now"><span class="won">5,500원</span><span class="unit">/ 1장</span></span>
+   </div>
+   <span class="disc-badge">30% ↓</span>
+   <span class="fee-chip">공동구매 수수료 <b>15%</b></span>
+   </div>
+   <ul class="feat">
+   <li>반컷팅(절취선) 적용 <br class="br-m">가위 없이 손으로 바로 떼어쓰기</li>
+   <li>초고해상도 최대 3,200dpi UV 인쇄</li>
+   <li>배경 없이 어디에나 깔끔한 부착</li>
+   <li>KC 기타 어린이제품 적합성 인증 완료 <br class="br-m">(유해물질 전체 미검출)</li>
+   <li>방수 기본, 식기세척기, UV소독기, 전자레인지(2분 이내) 사용 가능</li>
+   </ul>
+   <div class="spec-grid">
+   <div class="cell"><div class="k">사이즈</div><div class="v">14.2 × 20.8cm (A5)</div></div>
+   <div class="cell"><div class="k">재질</div><div class="v">UV / 필름</div></div>
+   <div class="cell"><div class="k">종류</div><div class="v">54종 디자인</div></div>
+   </div>
+   <div class="gift">
+   <span class="gk">사은품</span>
+   <span class="gv">기본 - A5 L홀더 1장, 조미료 스티커 12종 꾸미기 연습용 스티커<br>+ 4장 이상 구매 시 요술양말 1개 증정.</span>
+   </div>
+   <a class="store-link" href="https://smartstore.naver.com/sticorny/products/12825888581" target="_blank" rel="noopener">스마트스토어에서 보기 <span class="arr">→</span></a>
+  </div>
+  </article>
+
+  <!-- Product 3 -->
+  <article id="item-cloth-sticker" class="product reveal">
+  <div class="product-media">
+   <image-slot src="images/prod-3-cloth-sticker.webp" id="prod-3" shape="rounded" radius="20" placeholder="의류용 네임스티커 사진"></image-slot>
+   <span class="tag">최대 23% 할인</span>
+  </div>
+  <div class="product-body">
+   <div class="product-index">05</div>
+   <p class="product-en">Clothing Name Sticker</p>
+   <h3 class="display">의류용 네임스티커</h3>
+   <p class="product-tagline">다림질 열 없이 간편하게 <br class="br-m">세탁에 강한 의류용 네임 라벨</p>
+   <div class="price-block">
+   <div class="price-pair">
+    <span class="price-orig">S <s>6,400원</s> → <b>4,900원</b> (23%↓)</span>
+    <span class="price-orig">L <s>9,400원</s> → <b>7,900원</b> (15%↓)</span>
+   </div>
+   <span class="fee-chip">공동구매 수수료 <b>15%</b></span>
+   </div>
+   <ul class="feat">
+   <li>다림질 열 없이 간편하게 부착 가능</li>
+   <li>반복 세탁에도 쉽게 떨어지지 않는 강력 부착력</li>
+   <li>건조기 사용도 걱정 없어요 (고온, 잦은 건조기 사용 시 떨어질 수 있음)</li>
+   <li>KC 기타 어린이제품 적합성 인증 완료 <br class="br-m">(유해물질 전체 미검출)</li>
+   <li>그린가드 골드 인증 잉크 — 아이도 안심 사용</li>
+   </ul>
+   <div class="spec-grid">
+   <div class="cell"><div class="k">사이즈</div><div class="v">S 130×230<br>L 260×200</div></div>
+   <div class="cell"><div class="k">재질</div><div class="v">의류 전용 원단</div></div>
+   <div class="cell"><div class="k">종류</div><div class="v">24종 (S, L)</div></div>
+   </div>
+   <div class="gift">
+   <span class="gk">사은품</span>
+   <span class="gv">S, L사이즈 합산 4장 이상 구매 시<br class="br-m">요술양말 1개 증정</span>
+   </div>
+   <a class="store-link" href="https://smartstore.naver.com/sticorny/products/12976569242" target="_blank" rel="noopener">스마트스토어에서 보기 <span class="arr">→</span></a>
+  </div>
+  </article>
+
+  <!-- Product 4 -->
+  <article id="item-cloth-stamp" class="product product--rev reveal">
+  <div class="product-media">
+   <image-slot src="images/prod-4-cloth-stamp.webp" id="prod-4" shape="rounded" radius="20" placeholder="의류용 네임스탬프 사진"></image-slot>
+   <span class="tag">28% 할인</span>
+  </div>
+  <div class="product-body">
+   <div class="product-index">06</div>
+   <p class="product-en">Clothing Name Stamp</p>
+   <h3 class="display">의류용 네임스탬프</h3>
+   <p class="product-tagline">찍기만 하면 끝 — 바쁜 부모를 위한 간편한 의류용 네임 스탬프.</p>
+   <div class="price-block">
+   <div class="price-pair">
+    <span class="price-orig">일반가 <s>9,400원</s> / 1ea</span>
+    <span class="price-now"><span class="won">6,800원</span><span class="unit">/ 1ea</span></span>
+   </div>
+   <span class="disc-badge">28% ↓</span>
+   <span class="fee-chip">공동구매 수수료 <b>15%</b></span>
+   </div>
+   <ul class="feat">
+   <li>의류 전용 잉크 — 일반 세탁에도 지워지지 않는 강한 지속력</li>
+   <li>KC 어린이제품(완구) 안전 확인 인증 완료</li>
+   <li>찍기만 하면 끝! 바쁜 부모에게 최적화된 이름 표기</li>
+   <li>컴팩트한 휴대 사이즈 + 보관 파우치 포함</li>
+   <li>리필 잉크 별도 구매 가능 (장기간 반영구적 사용)</li>
+   </ul>
+   <div class="spec-grid">
+   <div class="cell"><div class="k">사이즈</div><div class="v">본체 65×33×21mm</div></div>
+   <div class="cell"><div class="k">재질</div><div class="v">플라스틱 외<br> (섬유 전용 잉크)</div></div>
+   <div class="cell"><div class="k">색상</div><div class="v">화이트, 핑크, 블루</div></div>
+   </div>
+   <div class="gift">
+   <span class="gk">사은품</span>
+   <span class="gv">UV 네임스티커(1조각) + 꾸미기 연습용 스티커.</span>
+   </div>
+   <a class="store-link" href="https://smartstore.naver.com/sticorny/products/12922401957" target="_blank" rel="noopener">스마트스토어에서 보기 <span class="arr">→</span></a>
+  </div>
+  </article>
+ </div>
+ </section>
+
+ <!-- ============ SUMMARY TABLE ============ -->
+ <section class="section" id="summary">
+ <div class="wrap">
+  <div class="section-head reveal">
+  <span class="eyebrow">Summary</span>
+  <h2 class="display">제품 종합 안내</h2>
+  <p>4종 제품의 판매가, 공동구매가, 할인율, 수수료를 한눈에 비교하세요. <br>배송비 3,000원 별도, 39,000원 이상 무료배송</p>
+  </div>
+  <div class="table-wrap reveal">
+  <table class="summary">
+   <thead>
+   <tr>
+    <th>제품명</th>
+    <th>상시 판매가</th>
+    <th>공동구매가</th>
+    <th>할인율</th>
+    <th>수수료</th>
+    <th>사은품</th>
+    <th>링크</th>
+   </tr>
+   </thead>
+   <tbody>
+   <tr>
+    <td class="pname" data-label="제품">UV 네임스티커<small>잘라쓰는</small></td>
+    <td class="orig" data-label="상시 판매가"><s>5,900원</s>/장</td>
+    <td class="now" data-label="공동구매가">3,900원/장</td>
+    <td class="disc" data-label="할인율">34% ↓</td>
+    <td data-label="수수료">15%</td>
+    <td data-label="사은품">기본 사은품 - A5 L홀더 / 12종 꾸미기 스티커<br>+4장 이상 구매 시 요술양말 증정</td>
+    <td data-label="링크"><a class="lnk" href="https://smartstore.naver.com/sticorny/products/12702901487" target="_blank" rel="noopener">보기 →</a></td>
+   </tr>
+   <tr>
+    <td class="pname" data-label="제품">UV 네임스티커<small>떼어쓰는</small></td>
+    <td class="orig" data-label="상시 판매가"><s>7,900원</s>/장</td>
+    <td class="now" data-label="공동구매가">5,500원/장</td>
+    <td class="disc" data-label="할인율">30% ↓</td>
+    <td data-label="수수료">15%</td>
+    <td data-label="사은품">기본 사은품 - A5 L홀더 / 12종 꾸미기 스티커<br>+4장 이상 구매 시 요술양말 증정</td>
+    <td data-label="링크"><a class="lnk" href="https://smartstore.naver.com/sticorny/products/12825888581" target="_blank" rel="noopener">보기 →</a></td>
+   </tr>
+   <tr>
+    <td class="pname" data-label="제품">의류용 네임스티커<small>S, L</small></td>
+    <td class="orig" data-label="상시 판매가">S <s>6,400</s> / L <s>9,400</s></td>
+    <td class="now" data-label="공동구매가">S 4,900 / L 7,900</td>
+    <td class="disc" data-label="할인율">S 23% / L 15% ↓</td>
+    <td data-label="수수료">15%</td>
+    <td data-label="사은품">S, L사이즈 합산 4장 이상 구매 시 요술양말 증정</td>
+    <td data-label="링크"><a class="lnk" href="https://smartstore.naver.com/sticorny/products/12976569242" target="_blank" rel="noopener">보기 →</a></td>
+   </tr>
+   <tr>
+    <td class="pname" data-label="제품">의류용 네임스탬프<small>3색</small></td>
+    <td class="orig" data-label="상시 판매가"><s>9,400원</s>/ea</td>
+    <td class="now" data-label="공동구매가">6,800원/ea</td>
+    <td class="disc" data-label="할인율">28% ↓</td>
+    <td data-label="수수료">15%</td>
+    <td data-label="사은품">UV 네임스티커(1조각), 연습용 스티커</td>
+    <td data-label="링크"><a class="lnk" href="https://smartstore.naver.com/sticorny/products/12922401957" target="_blank" rel="noopener">보기 →</a></td>
+   </tr>
+   </tbody>
+  </table>
+  </div>
+  <div class="ship-callout reveal">
+  <span class="ship-ic" aria-hidden="true">
+   <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z"></path><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+  </span>
+  <div class="ship-items">
+   <span class="ship-item"><b>기본 배송비</b> 3,000원</span>
+   <span class="ship-sep"></span>
+   <span class="ship-item"><b>39,000원 이상</b> 구매 시 무료배송</span>
+  </div>
+  </div>
+  <ul class="note-list reveal">
+  <li><b>추가 수수료</b>는 전 품목 전체 매출 합산 기준 <span class="pc-only">— </span><br class="br-m">2,000만원 이상 +2%(총 17%) <span class="pc-only">/ </span><br class="br-m">3,000만원 이상 +3%(총 18%) 추가 제공</li>
+  <li>전 품목 합배송 가능 (주문량 과다 시 변동 될 수 있음) — 제작 시간이 다른 제품은 별도 배송, 최종 협의 후 확정</li>
+  </ul>
+ </div>
+ </section>
+
+ <!-- ============ COMMISSION BAND ============ -->
+ <section class="band" id="commission">
+ <div class="wrap band-inner">
+  <div class="reveal">
+  <span class="eyebrow">Seller Benefit</span>
+  <h2 class="display">팔수록 커지는<br>매출별 추가 수수료</h2>
+  <p class="band-lead">전 품목(4종) 전체 매출을 합산해 구간을 달성하면, 기본 수수료에 추가 수수료를 더해 드립니다.</p>
+  </div>
+  <div class="tiers">
+  <div class="tier reveal">
+   <div class="cond">기본 공동구매 수수료</div>
+   <div class="rate">15%</div>
+   <div class="total">전 품목 공통 적용</div>
+  </div>
+  <div class="tier is-hi reveal">
+   <div class="cond">전 품목 합산 매출 2,000만원 ↑</div>
+   <div class="rate">+2%</div>
+   <div class="total">총 17% 수수료</div>
+  </div>
+  <div class="tier is-hi reveal">
+   <div class="cond">전 품목 합산 매출 3,000만원 ↑</div>
+   <div class="rate">+3%</div>
+   <div class="total">총 18% 수수료</div>
+  </div>
+  </div>
+ </div>
+ </section>
+
+ <!-- ============ CONTACT ============ -->
+ <section class="section section--alt" id="contact">
+ <div class="wrap contact">
+  <div class="contact-aside reveal">
+  <span class="eyebrow">Get in touch</span>
+  <h2 class="display">공동구매<br>제휴 문의</h2>
+  <p>조건 협의, 샘플, 일정 등 무엇이든 편하게 문의해 주세요.<br>담당자가 빠르게 안내드립니다.</p>
+  <div class="contact-methods">
+   <a class="cmethod" href="tel:07045718792">
+   <span class="ic" aria-hidden="true">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.91.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+   </span>
+   <span><span class="ck">전화 문의</span><br><span class="cv">070-4571-8792</span></span>
+   </a>
+   <div class="cmethod">
+   <span class="ic" aria-hidden="true">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a8 8 0 0 0-8 8c0 5 8 12 8 12s8-7 8-12a8 8 0 0 0-8-8z"></path><circle cx="12" cy="10" r="2.5"></circle></svg>
+   </span>
+   <span><span class="ck">담당자</span><br><span class="cv">이종수 / 010-4552-7163</span></span>
+   </div>
+   <div class="cmethod">
+   <span class="ic" aria-hidden="true">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"></rect><path d="m4 7 8 5 8-5"></path></svg>
+   </span>
+   <span><span class="ck">이메일</span><br><span class="cv" contenteditable="false">lifebegin1231@naver.com / lifelykor@naver.com</span></span>
+   </div>
+  </div>
+  </div>
+  <form class="form reveal" id="inquiry-form" novalidate="">
+  <div class="form-fields">
+   <div class="row two">
+   <div class="row" style="margin:0"><label for="f-name">성함 / 채널명 <span class="req">*</span></label><input id="f-name" name="name" type="text" required="" placeholder="예) 홍길동, 공구마켓"></div>
+   <div class="row" style="margin:0"><label for="f-phone">연락처 <span class="req">*</span></label><input id="f-phone" name="phone" type="tel" required="" placeholder="010-0000-0000"></div>
+   </div>
+   <div class="row"><label for="f-email">이메일</label><input id="f-email" name="email" type="email" placeholder="name@example.com"></div>
+   <div class="row"><label for="f-msg">문의 내용 <span class="req">*</span></label><textarea id="f-msg" name="message" required="" placeholder="관심 제품, 예상 진행 일정, 문의 사항을 자유롭게 적어주세요."></textarea></div>
+   <p class="form-err" id="form-err" role="alert"></p>
+   <button class="btn btn-accent" id="form-submit" type="submit">문의 접수하기</button>
+   <p class="form-note">접수 시 입력하신 내용이 스티코니 담당자에게 바로 전송됩니다.</p>
+  </div>
+  <div class="form-done">
+   <div class="ok" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"></path></svg></div>
+   <h4>문의가 접수되었습니다</h4>
+   <p>담당자가 확인 후 빠르게 연락드리겠습니다.<br>감사합니다 — 스티코니 드림.</p>
+  </div>
+  </form>
+ </div>
+ </section>
+
+ <!-- ============ FOOTER ============ -->
+ <footer class="footer">
+ <div class="wrap">
+  <div class="footer-top">
+  <a href="#top" class="footer-logo-link" aria-label="STICORNY">
+   <image-slot id="footer-logo" class="footer-logo-slot" shape="rect" fit="contain" src="assets/logo-gold.png" placeholder="로고"></image-slot>
+  </a>
+  <div class="footer-info">주식회사 라이프비기닝 고양지점, 브랜드 스티코니 (STICORNY)
+담당자 이종수 Tel 070-4571-8792
+제조국 대한민국, 과세, 제조업 / 인쇄업 외</div>
+  </div>
+  <div class="footer-bottom">
+  <span>
+</span>
+  <span>© 2026 STICORNY. 공동구매 제안서.</span>
+  </div>
+ </div>
+ </footer>
+
+ <!-- tweaks mount -->
+ <div id="tweaks-root"></div>
+
+ <!-- thumbnail for bundling -->
+ 
+
+ <script src="js/image-slot.js"></script>
+ <script src="js/react.development.js"></script>
+ <script src="js/react-dom.development.js"></script>
+ <script src="js/babel.min.js"></script>
+ <!-- tweaks-panel.jsx (디자인 도구용, 손대지 마세요) -->
+<script type="text/babel">
+
+/* BEGIN USAGE */
+// tweaks-panel.jsx
+// Reusable Tweaks shell + form-control helpers.
+// Exports (to window): useTweaks, TweaksPanel, TweakSection, TweakRow, TweakSlider,
+//   TweakToggle, TweakRadio, TweakSelect, TweakText, TweakNumber, TweakColor, TweakButton.
+//
+// Owns the host protocol (listens for __activate_edit_mode / __deactivate_edit_mode,
+// posts __edit_mode_available / __edit_mode_set_keys / __edit_mode_dismissed) so
+// individual prototypes don't re-roll it. Ships a consistent set of controls so you
+// don't hand-draw <input type="range">, segmented radios, steppers, etc.
+//
+// Usage (in an HTML file that loads React + Babel):
+//
+//   const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+//     "primaryColor": "#D97757",
+//     "palette": ["#D97757", "#29261b", "#f6f4ef"],
+//     "fontSize": 16,
+//     "density": "regular",
+//     "dark": false
+//   }/*EDITMODE-END*/;
+//
+//   function App() {
+//     const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+//     return (
+//       <div style={{ fontSize: t.fontSize, color: t.primaryColor }}>
+//         Hello
+//         <TweaksPanel>
+//           <TweakSection label="Typography" />
+//           <TweakSlider label="Font size" value={t.fontSize} min={10} max={32} unit="px"
+//                        onChange={(v) => setTweak('fontSize', v)} />
+//           <TweakRadio  label="Density" value={t.density}
+//                        options={['compact', 'regular', 'comfy']}
+//                        onChange={(v) => setTweak('density', v)} />
+//           <TweakSection label="Theme" />
+//           <TweakColor  label="Primary" value={t.primaryColor}
+//                        options={['#D97757', '#2A6FDB', '#1F8A5B', '#7A5AE0']}
+//                        onChange={(v) => setTweak('primaryColor', v)} />
+//           <TweakColor  label="Palette" value={t.palette}
+//                        options={[['#D97757', '#29261b', '#f6f4ef'],
+//                                  ['#475569', '#0f172a', '#f1f5f9']]}
+//                        onChange={(v) => setTweak('palette', v)} />
+//           <TweakToggle label="Dark mode" value={t.dark}
+//                        onChange={(v) => setTweak('dark', v)} />
+//         </TweaksPanel>
+//       </div>
+//     );
+//   }
+//
+// TweakRadio is the segmented control for 2–3 short options (auto-falls-back to
+// TweakSelect past ~16/~10 chars per label); reach for TweakSelect directly when
+// options are many or long. For color tweaks always curate 3-4 options rather than
+// a free picker; an option can also be a whole 2–5 color palette (the stored value
+// is the array). The Tweak* controls are a floor, not a ceiling — build custom
+// controls inside the panel if a tweak calls for UI they don't cover.
+/* END USAGE */
+// ─────────────────────────────────────────────────────────────────────────────
+
+const __TWEAKS_STYLE = `
+  .twk-panel{position:fixed;right:16px;bottom:16px;z-index:2147483646;width:280px;
+    max-height:calc(100vh - 32px);display:flex;flex-direction:column;
+    transform:scale(var(--dc-inv-zoom,1));transform-origin:bottom right;
+    background:rgba(250,249,247,.78);color:#29261b;
+    -webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);
+    border:.5px solid rgba(255,255,255,.6);border-radius:14px;
+    box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 12px 40px rgba(0,0,0,.18);
+    font:11.5px/1.4 ui-sans-serif,system-ui,-apple-system,sans-serif;overflow:hidden}
+  .twk-hd{display:flex;align-items:center;justify-content:space-between;
+    padding:10px 8px 10px 14px;cursor:move;user-select:none}
+  .twk-hd b{font-size:12px;font-weight:600;letter-spacing:.01em}
+  .twk-x{appearance:none;border:0;background:transparent;color:rgba(41,38,27,.55);
+    width:22px;height:22px;border-radius:6px;cursor:default;font-size:13px;line-height:1}
+  .twk-x:hover{background:rgba(0,0,0,.06);color:#29261b}
+  .twk-body{padding:2px 14px 14px;display:flex;flex-direction:column;gap:10px;
+    overflow-y:auto;overflow-x:hidden;min-height:0;
+    scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.15) transparent}
+  .twk-body::-webkit-scrollbar{width:8px}
+  .twk-body::-webkit-scrollbar-track{background:transparent;margin:2px}
+  .twk-body::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:4px;
+    border:2px solid transparent;background-clip:content-box}
+  .twk-body::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,.25);
+    border:2px solid transparent;background-clip:content-box}
+  .twk-row{display:flex;flex-direction:column;gap:5px}
+  .twk-row-h{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
+  .twk-lbl{display:flex;justify-content:space-between;align-items:baseline;
+    color:rgba(41,38,27,.72)}
+  .twk-lbl>span:first-child{font-weight:500}
+  .twk-val{color:rgba(41,38,27,.5);font-variant-numeric:tabular-nums}
+
+  .twk-sect{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
+    color:rgba(41,38,27,.45);padding:10px 0 0}
+  .twk-sect:first-child{padding-top:0}
+
+  .twk-field{appearance:none;box-sizing:border-box;width:100%;min-width:0;height:26px;padding:0 8px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:7px;
+    background:rgba(255,255,255,.6);color:inherit;font:inherit;outline:none}
+  .twk-field:focus{border-color:rgba(0,0,0,.25);background:rgba(255,255,255,.85)}
+  select.twk-field{padding-right:22px;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='rgba(0,0,0,.5)' d='M0 0h10L5 6z'/></svg>");
+    background-repeat:no-repeat;background-position:right 8px center}
+
+  .twk-slider{appearance:none;-webkit-appearance:none;width:100%;height:4px;margin:6px 0;
+    border-radius:999px;background:rgba(0,0,0,.12);outline:none}
+  .twk-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
+    width:14px;height:14px;border-radius:50%;background:#fff;
+    border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
+  .twk-slider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;
+    background:#fff;border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
+
+  .twk-seg{position:relative;display:flex;padding:2px;border-radius:8px;
+    background:rgba(0,0,0,.06);user-select:none}
+  .twk-seg-thumb{position:absolute;top:2px;bottom:2px;border-radius:6px;
+    background:rgba(255,255,255,.9);box-shadow:0 1px 2px rgba(0,0,0,.12);
+    transition:left .15s cubic-bezier(.3,.7,.4,1),width .15s}
+  .twk-seg.dragging .twk-seg-thumb{transition:none}
+  .twk-seg button{appearance:none;position:relative;z-index:1;flex:1;border:0;
+    background:transparent;color:inherit;font:inherit;font-weight:500;min-height:22px;
+    border-radius:6px;cursor:default;padding:4px 6px;line-height:1.2;
+    overflow-wrap:anywhere}
+
+  .twk-toggle{position:relative;width:32px;height:18px;border:0;border-radius:999px;
+    background:rgba(0,0,0,.15);transition:background .15s;cursor:default;padding:0}
+  .twk-toggle[data-on="1"]{background:#34c759}
+  .twk-toggle i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;
+    background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
+  .twk-toggle[data-on="1"] i{transform:translateX(14px)}
+
+  .twk-num{display:flex;align-items:center;box-sizing:border-box;min-width:0;height:26px;padding:0 0 0 8px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:7px;background:rgba(255,255,255,.6)}
+  .twk-num-lbl{font-weight:500;color:rgba(41,38,27,.6);cursor:ew-resize;
+    user-select:none;padding-right:8px}
+  .twk-num input{flex:1;min-width:0;height:100%;border:0;background:transparent;
+    font:inherit;font-variant-numeric:tabular-nums;text-align:right;padding:0 8px 0 0;
+    outline:none;color:inherit;-moz-appearance:textfield}
+  .twk-num input::-webkit-inner-spin-button,.twk-num input::-webkit-outer-spin-button{
+    -webkit-appearance:none;margin:0}
+  .twk-num-unit{padding-right:8px;color:rgba(41,38,27,.45)}
+
+  .twk-btn{appearance:none;height:26px;padding:0 12px;border:0;border-radius:7px;
+    background:rgba(0,0,0,.78);color:#fff;font:inherit;font-weight:500;cursor:default}
+  .twk-btn:hover{background:rgba(0,0,0,.88)}
+  .twk-btn.secondary{background:rgba(0,0,0,.06);color:inherit}
+  .twk-btn.secondary:hover{background:rgba(0,0,0,.1)}
+
+  .twk-swatch{appearance:none;-webkit-appearance:none;width:56px;height:22px;
+    border:.5px solid rgba(0,0,0,.1);border-radius:6px;padding:0;cursor:default;
+    background:transparent;flex-shrink:0}
+  .twk-swatch::-webkit-color-swatch-wrapper{padding:0}
+  .twk-swatch::-webkit-color-swatch{border:0;border-radius:5.5px}
+  .twk-swatch::-moz-color-swatch{border:0;border-radius:5.5px}
+
+  .twk-chips{display:flex;gap:6px}
+  .twk-chip{position:relative;appearance:none;flex:1;min-width:0;height:46px;
+    padding:0;border:0;border-radius:6px;overflow:hidden;cursor:default;
+    box-shadow:0 0 0 .5px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.06);
+    transition:transform .12s cubic-bezier(.3,.7,.4,1),box-shadow .12s}
+  .twk-chip:hover{transform:translateY(-1px);
+    box-shadow:0 0 0 .5px rgba(0,0,0,.18),0 4px 10px rgba(0,0,0,.12)}
+  .twk-chip[data-on="1"]{box-shadow:0 0 0 1.5px rgba(0,0,0,.85),
+    0 2px 6px rgba(0,0,0,.15)}
+  .twk-chip>span{position:absolute;top:0;bottom:0;right:0;width:34%;
+    display:flex;flex-direction:column;box-shadow:-1px 0 0 rgba(0,0,0,.1)}
+  .twk-chip>span>i{flex:1;box-shadow:0 -1px 0 rgba(0,0,0,.1)}
+  .twk-chip>span>i:first-child{box-shadow:none}
+  .twk-chip svg{position:absolute;top:6px;left:6px;width:13px;height:13px;
+    filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
+`;
+
+// ── useTweaks ───────────────────────────────────────────────────────────────
+// Single source of truth for tweak values. setTweak persists via the host
+// (__edit_mode_set_keys → host rewrites the EDITMODE block on disk).
+function useTweaks(defaults) {
+  const [values, setValues] = React.useState(defaults);
+  // Accepts either setTweak('key', value) or setTweak({ key: value, ... }) so a
+  // useState-style call doesn't write a "[object Object]" key into the persisted
+  // JSON block.
+  const setTweak = React.useCallback((keyOrEdits, val) => {
+    const edits = typeof keyOrEdits === 'object' && keyOrEdits !== null
+      ? keyOrEdits : { [keyOrEdits]: val };
+    setValues((prev) => ({ ...prev, ...edits }));
+    window.parent.postMessage({ type: '__edit_mode_set_keys', edits }, '*');
+    // Same-window signal so in-page listeners (deck-stage rail thumbnails)
+    // can react — the parent message only reaches the host, not peers.
+    window.dispatchEvent(new CustomEvent('tweakchange', { detail: edits }));
+  }, []);
+  return [values, setTweak];
+}
+
+// ── TweaksPanel ─────────────────────────────────────────────────────────────
+// Floating shell. Registers the protocol listener BEFORE announcing
+// availability — if the announce ran first, the host's activate could land
+// before our handler exists and the toolbar toggle would silently no-op.
+// The close button posts __edit_mode_dismissed so the host's toolbar toggle
+// flips off in lockstep; the host echoes __deactivate_edit_mode back which
+// is what actually hides the panel.
+function TweaksPanel({ title = 'Tweaks', children }) {
+  const [open, setOpen] = React.useState(false);
+  const dragRef = React.useRef(null);
+  const offsetRef = React.useRef({ x: 16, y: 16 });
+  const PAD = 16;
+
+  const clampToViewport = React.useCallback(() => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const w = panel.offsetWidth, h = panel.offsetHeight;
+    const maxRight = Math.max(PAD, window.innerWidth - w - PAD);
+    const maxBottom = Math.max(PAD, window.innerHeight - h - PAD);
+    offsetRef.current = {
+      x: Math.min(maxRight, Math.max(PAD, offsetRef.current.x)),
+      y: Math.min(maxBottom, Math.max(PAD, offsetRef.current.y)),
+    };
+    panel.style.right = offsetRef.current.x + 'px';
+    panel.style.bottom = offsetRef.current.y + 'px';
+  }, []);
+
+  React.useEffect(() => {
+    if (!open) return;
+    clampToViewport();
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', clampToViewport);
+      return () => window.removeEventListener('resize', clampToViewport);
+    }
+    const ro = new ResizeObserver(clampToViewport);
+    ro.observe(document.documentElement);
+    return () => ro.disconnect();
+  }, [open, clampToViewport]);
+
+  React.useEffect(() => {
+    const onMsg = (e) => {
+      const t = e?.data?.type;
+      if (t === '__activate_edit_mode') setOpen(true);
+      else if (t === '__deactivate_edit_mode') setOpen(false);
+    };
+    window.addEventListener('message', onMsg);
+    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
+    return () => window.removeEventListener('message', onMsg);
+  }, []);
+
+  const dismiss = () => {
+    setOpen(false);
+    window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*');
+  };
+
+  const onDragStart = (e) => {
+    const panel = dragRef.current;
+    if (!panel) return;
+    const r = panel.getBoundingClientRect();
+    const sx = e.clientX, sy = e.clientY;
+    const startRight = window.innerWidth - r.right;
+    const startBottom = window.innerHeight - r.bottom;
+    const move = (ev) => {
+      offsetRef.current = {
+        x: startRight - (ev.clientX - sx),
+        y: startBottom - (ev.clientY - sy),
+      };
+      clampToViewport();
+    };
+    const up = () => {
+      window.removeEventListener('mousemove', move);
+      window.removeEventListener('mouseup', up);
+    };
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', up);
+  };
+
+  if (!open) return null;
+  return (
+    <>
+      <style>{__TWEAKS_STYLE}</style>
+      <div ref={dragRef} className="twk-panel" data-omelette-chrome=""
+           style={{ right: offsetRef.current.x, bottom: offsetRef.current.y }}>
+        <div className="twk-hd" onMouseDown={onDragStart}>
+          <b>{title}</b>
+          <button className="twk-x" aria-label="Close tweaks"
+                  onMouseDown={(e) => e.stopPropagation()}
+                  onClick={dismiss}>✕</button>
+        </div>
+        <div className="twk-body">
+          {children}
+        </div>
+      </div>
+    </>
+  );
+}
+
+// ── Layout helpers ──────────────────────────────────────────────────────────
+
+function TweakSection({ label, children }) {
+  return (
+    <>
+      <div className="twk-sect">{label}</div>
+      {children}
+    </>
+  );
+}
+
+function TweakRow({ label, value, children, inline = false }) {
+  return (
+    <div className={inline ? 'twk-row twk-row-h' : 'twk-row'}>
+      <div className="twk-lbl">
+        <span>{label}</span>
+        {value != null && <span className="twk-val">{value}</span>}
+      </div>
+      {children}
+    </div>
+  );
+}
+
+// ── Controls ────────────────────────────────────────────────────────────────
+
+function TweakSlider({ label, value, min = 0, max = 100, step = 1, unit = '', onChange }) {
+  return (
+    <TweakRow label={label} value={`${value}${unit}`}>
+      <input type="range" className="twk-slider" min={min} max={max} step={step}
+             value={value} onChange={(e) => onChange(Number(e.target.value))} />
+    </TweakRow>
+  );
+}
+
+function TweakToggle({ label, value, onChange }) {
+  return (
+    <div className="twk-row twk-row-h">
+      <div className="twk-lbl"><span>{label}</span></div>
+      <button type="button" className="twk-toggle" data-on={value ? '1' : '0'}
+              role="switch" aria-checked={!!value}
+              onClick={() => onChange(!value)}><i /></button>
+    </div>
+  );
+}
+
+function TweakRadio({ label, value, options, onChange }) {
+  const trackRef = React.useRef(null);
+  const [dragging, setDragging] = React.useState(false);
+  // The active value is read by pointer-move handlers attached for the lifetime
+  // of a drag — ref it so a stale closure doesn't fire onChange for every move.
+  const valueRef = React.useRef(value);
+  valueRef.current = value;
+
+  // Segments wrap mid-word once per-segment width runs out. The track is
+  // ~248px (280 panel − 28 body pad − 4 seg pad), each button loses 12px
+  // to its own padding, and 11.5px system-ui averages ~6.3px/char — so 2
+  // options fit ~16 chars each, 3 fit ~10. Past that (or >3 options), fall
+  // back to a dropdown rather than wrap.
+  const labelLen = (o) => String(typeof o === 'object' ? o.label : o).length;
+  const maxLen = options.reduce((m, o) => Math.max(m, labelLen(o)), 0);
+  const fitsAsSegments = maxLen <= ({ 2: 16, 3: 10 }[options.length] ?? 0);
+  if (!fitsAsSegments) {
+    // <select> emits strings — map back to the original option value so the
+    // fallback stays type-preserving (numbers, booleans) like the segment path.
+    const resolve = (s) => {
+      const m = options.find((o) => String(typeof o === 'object' ? o.value : o) === s);
+      return m === undefined ? s : typeof m === 'object' ? m.value : m;
+    };
+    return <TweakSelect label={label} value={value} options={options}
+                        onChange={(s) => onChange(resolve(s))} />;
+  }
+  const opts = options.map((o) => (typeof o === 'object' ? o : { value: o, label: o }));
+  const idx = Math.max(0, opts.findIndex((o) => o.value === value));
+  const n = opts.length;
+
+  const segAt = (clientX) => {
+    const r = trackRef.current.getBoundingClientRect();
+    const inner = r.width - 4;
+    const i = Math.floor(((clientX - r.left - 2) / inner) * n);
+    return opts[Math.max(0, Math.min(n - 1, i))].value;
+  };
+
+  const onPointerDown = (e) => {
+    setDragging(true);
+    const v0 = segAt(e.clientX);
+    if (v0 !== valueRef.current) onChange(v0);
+    const move = (ev) => {
+      if (!trackRef.current) return;
+      const v = segAt(ev.clientX);
+      if (v !== valueRef.current) onChange(v);
+    };
+    const up = () => {
+      setDragging(false);
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+
+  return (
+    <TweakRow label={label}>
+      <div ref={trackRef} role="radiogroup" onPointerDown={onPointerDown}
+           className={dragging ? 'twk-seg dragging' : 'twk-seg'}>
+        <div className="twk-seg-thumb"
+             style={{ left: `calc(2px + ${idx} * (100% - 4px) / ${n})`,
+                      width: `calc((100% - 4px) / ${n})` }} />
+        {opts.map((o) => (
+          <button key={o.value} type="button" role="radio" aria-checked={o.value === value}>
+            {o.label}
+          </button>
+        ))}
+      </div>
+    </TweakRow>
+  );
+}
+
+function TweakSelect({ label, value, options, onChange }) {
+  return (
+    <TweakRow label={label}>
+      <select className="twk-field" value={value} onChange={(e) => onChange(e.target.value)}>
+        {options.map((o) => {
+          const v = typeof o === 'object' ? o.value : o;
+          const l = typeof o === 'object' ? o.label : o;
+          return <option key={v} value={v}>{l}</option>;
+        })}
+      </select>
+    </TweakRow>
+  );
+}
+
+function TweakText({ label, value, placeholder, onChange }) {
+  return (
+    <TweakRow label={label}>
+      <input className="twk-field" type="text" value={value} placeholder={placeholder}
+             onChange={(e) => onChange(e.target.value)} />
+    </TweakRow>
+  );
+}
+
+function TweakNumber({ label, value, min, max, step = 1, unit = '', onChange }) {
+  const clamp = (n) => {
+    if (min != null && n < min) return min;
+    if (max != null && n > max) return max;
+    return n;
+  };
+  const startRef = React.useRef({ x: 0, val: 0 });
+  const onScrubStart = (e) => {
+    e.preventDefault();
+    startRef.current = { x: e.clientX, val: value };
+    const decimals = (String(step).split('.')[1] || '').length;
+    const move = (ev) => {
+      const dx = ev.clientX - startRef.current.x;
+      const raw = startRef.current.val + dx * step;
+      const snapped = Math.round(raw / step) * step;
+      onChange(clamp(Number(snapped.toFixed(decimals))));
+    };
+    const up = () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+  };
+  return (
+    <div className="twk-num">
+      <span className="twk-num-lbl" onPointerDown={onScrubStart}>{label}</span>
+      <input type="number" value={value} min={min} max={max} step={step}
+             onChange={(e) => onChange(clamp(Number(e.target.value)))} />
+      {unit && <span className="twk-num-unit">{unit}</span>}
+    </div>
+  );
+}
+
+// Relative-luminance contrast pick — checkmarks drawn over a swatch need to
+// read on both #111 and #fafafa without per-option configuration. Hex input
+// only (#rgb / #rrggbb); named or rgb()/hsl() colors fall through to "light".
+function __twkIsLight(hex) {
+  const h = String(hex).replace('#', '');
+  const x = h.length === 3 ? h.replace(/./g, (c) => c + c) : h.padEnd(6, '0');
+  const n = parseInt(x.slice(0, 6), 16);
+  if (Number.isNaN(n)) return true;
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  return r * 299 + g * 587 + b * 114 > 148000;
+}
+
+const __TwkCheck = ({ light }) => (
+  <svg viewBox="0 0 14 14" aria-hidden="true">
+    <path d="M3 7.2 5.8 10 11 4.2" fill="none" strokeWidth="2.2"
+          strokeLinecap="round" strokeLinejoin="round"
+          stroke={light ? 'rgba(0,0,0,.78)' : '#fff'} />
+  </svg>
+);
+
+// TweakColor — curated color/palette picker. Each option is either a single
+// hex string or an array of 1-5 hex strings; the card adapts — a lone color
+// renders solid, a palette renders colors[0] as the hero (left ~2/3) with the
+// rest stacked in a sharp column on the right. onChange emits the
+// option in the shape it was passed (string stays string, array stays array).
+// Without options it falls back to the native color input for back-compat.
+function TweakColor({ label, value, options, onChange }) {
+  if (!options || !options.length) {
+    return (
+      <div className="twk-row twk-row-h">
+        <div className="twk-lbl"><span>{label}</span></div>
+        <input type="color" className="twk-swatch" value={value}
+               onChange={(e) => onChange(e.target.value)} />
+      </div>
+    );
+  }
+  // Native <input type=color> emits lowercase hex per the HTML spec, so
+  // compare case-insensitively. String() guards JSON.stringify(undefined),
+  // which returns the primitive undefined (no .toLowerCase).
+  const key = (o) => String(JSON.stringify(o)).toLowerCase();
+  const cur = key(value);
+  return (
+    <TweakRow label={label}>
+      <div className="twk-chips" role="radiogroup">
+        {options.map((o, i) => {
+          const colors = Array.isArray(o) ? o : [o];
+          const [hero, ...rest] = colors;
+          const sup = rest.slice(0, 4);
+          const on = key(o) === cur;
+          return (
+            <button key={i} type="button" className="twk-chip" role="radio"
+                    aria-checked={on} data-on={on ? '1' : '0'}
+                    aria-label={colors.join(', ')} title={colors.join(' · ')}
+                    style={{ background: hero }}
+                    onClick={() => onChange(o)}>
+              {sup.length > 0 && (
+                <span>
+                  {sup.map((c, j) => <i key={j} style={{ background: c }} />)}
+                </span>
+              )}
+              {on && <__TwkCheck light={__twkIsLight(hero)} />}
+            </button>
+          );
+        })}
+      </div>
+    </TweakRow>
+  );
+}
+
+function TweakButton({ label, onClick, secondary = false }) {
+  return (
+    <button type="button" className={secondary ? 'twk-btn secondary' : 'twk-btn'}
+            onClick={onClick}>{label}</button>
+  );
+}
+
+Object.assign(window, {
+  useTweaks, TweaksPanel, TweakSection, TweakRow,
+  TweakSlider, TweakToggle, TweakRadio, TweakSelect,
+  TweakText, TweakNumber, TweakColor, TweakButton,
+});
+
+</script>
+ <!-- tweaks-app.jsx (색·분위기 설정, 손대지 마세요) -->
+<script type="text/babel">
+/* global React, ReactDOM, useTweaks, TweaksPanel, TweakSection, TweakColor, TweakRadio */
+
+const STICORNY_TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "variant": "차분 미니멀",
+  "accent": "#F4C144"
+}/*EDITMODE-END*/;
+
+const VARIANT_MAP = {
+  "묵직 에디토리얼": "editorial",
+  "차분 미니멀": "minimal",
+  "풀다크 럭셔리": "dark"
+};
+
+function lum(hex) {
+  const h = hex.replace("#", "");
+  const n = parseInt(h.length === 3 ? h.split("").map(c => c + c).join("") : h, 16);
+  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+}
+function shade(hex, amt) {
+  const h = hex.replace("#", "");
+  const n = parseInt(h.length === 3 ? h.split("").map(c => c + c).join("") : h, 16);
+  let r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
+  const f = 1 + amt;
+  r = Math.round(r * f); g = Math.round(g * f); b = Math.round(b * f);
+  return "#" + [r, g, b].map(v => Math.max(0, Math.min(255, v)).toString(16).padStart(2, "0")).join("");
+}
+
+function applyTweaks(variant, accent) {
+  document.body.setAttribute("data-variant", VARIANT_MAP[variant] || "editorial");
+  const r = document.documentElement.style;
+  r.setProperty("--accent", accent);
+  r.setProperty("--accent-deep", shade(accent, -0.22));
+  // deepened, same-hue gold for text/numbers on light backgrounds (legible);
+  // the dark bands override --accent-text back to the bright --accent via CSS.
+  r.setProperty("--accent-text", shade(accent, -0.42));
+  r.setProperty("--on-accent", lum(accent) > 0.62 ? "#221813" : "#F6EFE0");
+}
+
+function App() {
+  const [t, setTweak] = useTweaks(STICORNY_TWEAK_DEFAULTS);
+  React.useEffect(() => { applyTweaks(t.variant, t.accent); }, [t.variant, t.accent]);
+  return (
+    <TweaksPanel title="Tweaks">
+      <TweakSection label="시안 (무드)" />
+      <TweakRadio label="시안" value={t.variant}
+        options={["묵직 에디토리얼", "차분 미니멀", "풀다크 럭셔리"]}
+        onChange={(v) => setTweak("variant", v)} />
+      <TweakSection label="포인트 컬러" />
+      <TweakColor label="포인트" value={t.accent}
+        options={["#F4C144", "#E0A52E", "#C86B3A", "#7A4A24", "#3F6B4A"]}
+        onChange={(v) => setTweak("accent", v)} />
+    </TweaksPanel>
+  );
+}
+
+// First paint before React mounts.
+applyTweaks(STICORNY_TWEAK_DEFAULTS.variant, STICORNY_TWEAK_DEFAULTS.accent);
+
+ReactDOM.createRoot(document.getElementById("tweaks-root")).render(<App />);
+
+</script>
+ <script>
+ // branded placeholder hint for every empty image slot (works in all moods,
+ // incl. 풀다크 where the built-in caption is invisible)
+ document.querySelectorAll("image-slot").forEach((slot) => {
+  if (slot.id === "nav-logo" || slot.id === "footer-logo") return; // small brand logo — no big hint
+  const parent = slot.parentElement;
+  if (!parent) return;
+  const hint = document.createElement("div");
+  hint.className = "slot-hint";
+  hint.innerHTML =
+  '<svg class="ic" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.7"/><path d="m21 15-5-5L5 21"/></svg>' +
+  '<span class="t">' + (slot.getAttribute("placeholder") || "이미지를 넣어주세요") + '</span>' +
+  '<span class="s">사진을 끌어다 놓거나 클릭</span>';
+  parent.appendChild(hint);
+  const sync = () => { hint.style.display = slot.hasAttribute("data-filled") ? "none" : "flex"; };
+  new MutationObserver(sync).observe(slot, { attributes: true, attributeFilter: ["data-filled"] });
+  sync();
+ });
+
+ // reveal on scroll
+ const io = new IntersectionObserver((entries) => {
+  entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } });
+ }, { threshold: 0.12 });
+ document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
+
+ /* ============================================================
+  문의 폼 — 서버 전송(연결형)
+  ▶ 아래 FORM_ENDPOINT 한 줄만 본인 서버 주소로 바꾸면 됩니다.
+   - 직접 만든 서버 API 예) "https://api.sticorny.co.kr/inquiry"
+   - 또는 무료 폼 서비스 예) Web3Forms "https://api.web3forms.com/submit"
+         Formspree "https://formspree.io/f/xxxxxx"
+  ▶ 전송 형식: JSON (POST). 서버에서 받는 필드 키:
+   name(성함/채널), phone(연락처), email(이메일), message(문의내용),
+   _subject(메일 제목), to(수신 메일주소)
+  ▶ Web3Forms를 쓰면 ACCESS_KEY에 발급키를 넣으세요(서버 코드 불필요).
+  ============================================================ */
+ const FORM_ENDPOINT = "https://api.web3forms.com/submit"; // ← 본인 서버 주소로 교체
+ const ACCESS_KEY = "add041ce-9926-4d4e-aabe-8c322d38f938"; // Web3Forms 발급키 (lifebegin1231@naver.com)
+ const MAIL_TO = "lifebegin1231@naver.com";
+
+ const form = document.getElementById("inquiry-form");
+ const errEl = document.getElementById("form-err");
+ const btn = document.getElementById("form-submit");
+
+ if (form) form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const v = (id) => (document.getElementById(id)?.value || "").trim();
+  const name = v("f-name"), phone = v("f-phone"), email = v("f-email"), message = v("f-msg");
+
+  // 간단 검증
+  errEl.classList.remove("show");
+  if (!name || !phone || !message) {
+  errEl.textContent = "성함, 연락처, 문의 내용을 입력해 주세요.";
+  errEl.classList.add("show");
+  return;
+  }
+
+  const payload = {
+  access_key: ACCESS_KEY,
+  subject: "[스티코니 공동구매 제휴 문의] " + name,
+  from_name: "스티코니 공동구매 제안 사이트",
+  "성함/채널명": name,
+  "연락처": phone,
+  "이메일": email || "(미기재)",
+  "문의내용": message
+  };
+
+  // 전송 중 상태
+  const label = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = "전송 중…";
+
+  try {
+  const res = await fetch(FORM_ENDPOINT, {
+   method: "POST",
+   headers: { "Content-Type": "application/json", "Accept": "application/json" },
+   body: JSON.stringify(payload)
+  });
+  if (!res.ok) throw new Error("HTTP " + res.status);
+  form.classList.add("sent"); // 성공 화면
+  } catch (err) {
+  btn.disabled = false;
+  btn.textContent = label;
+  errEl.innerHTML =
+   "전송에 실패했습니다. 잠시 후 다시 시도하거나 " +
+   '<a href="mailto:' + MAIL_TO + '">' + MAIL_TO + "</a> 으로 보내주세요.";
+  errEl.classList.add("show");
+  }
+ });
+
+ /* PC-only: corn cursor click motion — squish on press + ripple pop */
+ (function(){
+  if (window.matchMedia && window.matchMedia('(hover: none)').matches) return;
+  const press = () => document.body.classList.add('corn-press');
+  const release = () => document.body.classList.remove('corn-press');
+  document.addEventListener('mousedown', press);
+  document.addEventListener('mouseup', release);
+  window.addEventListener('blur', release);
+  document.addEventListener('click', (e) => {
+   const p = document.createElement('span');
+   p.className = 'corn-pop';
+   p.style.left = e.clientX + 'px';
+   p.style.top = e.clientY + 'px';
+   document.body.appendChild(p);
+   p.addEventListener('animationend', () => p.remove());
+  });
+ })();
+ </script>
+
+
+</body></html>
