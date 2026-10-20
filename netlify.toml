@@ -1,3 +1,6 @@
 # Netlify 설정: site 폴더를 그대로 올린다 (빌드 과정 없음)
 [build]
   publish = "site"
+  # site 폴더가 바뀌지 않았으면 배포를 건너뛴다 (README 만 고칠 때 크레딧을 쓰지 않게).
+  # 이 파일(netlify.toml)만 바꾼 커밋도 건너뛰니, 설정을 바꿀 때는 Netlify 에서 직접 다시 배포한다.
+  ignore = "git diff --quiet $CACHED_COMMIT_REF $COMMIT_REF -- site"
